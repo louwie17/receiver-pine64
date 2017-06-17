@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 
 #define MAX_TIMINGS	  86
 
@@ -86,6 +87,11 @@ static char * dec2binWzerofill(unsigned long Dec, unsigned int bitLength) {
   return bin;
 }
 
+void cleanupReceiver(int dummy) {
+  wiringPiCleanup();
+  exit(1);
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -110,7 +116,7 @@ int main(int argc, char *argv[])
     RCSwitch mySwitch = RCSwitch();
     mySwitch.enableReceive(0, RECEIVER_PIN);
 
-    atexit(wiringPiCleanup);
+  signal(SIGINT, cleanupReceiver);
 
     while (1) {
         if (mySwitch.available()) {

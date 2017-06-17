@@ -231,11 +231,21 @@ void wiringPiCleanup()
   cleanup();
   allowCheckForInterrupt = 0;
   int fd, i;
-  int count = sizeof(sysFds);
-  for (i = 0 ; i < count ; ++i) {
-    if ((fd = sysFds[count]) != -1) {
-      printf("cleaned up pin: %d\n", count);
+  int count = 32;
+  for (i = 0 ; i < count ; i++) {
+    if ((fd = sysFds[i]) > 0) {
       close(fd);
+      int gpioPin = get_gpio_number(i);
+
+      int fdExport, len;
+      char str_gpio[4];
+
+      if ((fdExport = open("/sys/class/gpio/unexport", O_WRONLY)) < 0)
+          return -1;
+      len = snprintf(str_gpio, sizeof(str_gpio), "%d", gpioPin);
+      write(fdExport, str_gpio, len);
+      close(fdExport);
+      printf("cleaned up pin: %d\n",i);
     }
   }
 }
@@ -252,8 +262,8 @@ void wiringPiCleanup()
 
 int waitForInterrupt (int pin, int mS)
 {
-  int fd, x ;
-  uint8_t c ;
+    int fd, x ;
+    uint8_t c ;
   struct pollfd polls ;
 
   if ((fd = sysFds [pin]) == -1)
@@ -298,7 +308,7 @@ static void *interruptHandler (UNU void *arg)
   myPin   = pinPass;
   pinPass = -1 ;
 
-  for (allowCheckForInterrupt) {
+  while (allowCheckForInterrupt) {
     if (waitForInterrupt (myPin, -1) > 0) {
       //printf("interrupt\n");
       isrFunctions [myPin] () ;
@@ -392,7 +402,7 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
   char  c ;
   int bouncetime = 100;
   int gpioPin = get_gpio_number(pin);
-  int bmcPin = get_bcm_number(pin);
+  int bcmPin = get_bcm_number(pin);
 
   char gpioDirName[64];
   snprintf(gpioDirName, sizeof(gpioDirName), "/sys/class/gpio/gpio%d", gpioPin);
@@ -438,7 +448,7 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
 // Clear any initial pending interrupt
 
   ioctl (sysFds [bcmPin], FIONREAD, &count) ;
-  printf("ioctl count: %d", count);
+  printf("ioctl count: %d\n", count);
   for (i = 0 ; i < count ; ++i) {
     read (sysFds [bcmPin], &c, 1);
   }
@@ -451,6 +461,7 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
     while (pinPass != -1) {
       delay (1) ;
     }
+    printf("Finished setting up thread\n");
   pthread_mutex_unlock (&pinMutex) ;
   return 0;
 }
