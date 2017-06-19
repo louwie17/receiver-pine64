@@ -245,7 +245,7 @@ void wiringPiCleanup()
       len = snprintf(str_gpio, sizeof(str_gpio), "%d", gpioPin);
       write(fdExport, str_gpio, len);
       close(fdExport);
-      printf("cleaned up pin: %d\n",i);
+      DEBUG_PRINT("cleaned up pin: %d\n",i);
     }
   }
 }
@@ -276,13 +276,11 @@ int waitForInterrupt (int pin, int mS)
 
 // Wait for it ...
 
-  //printf("polling\n");
   x = poll (&polls, 1, mS) ;
 
 // If no error, do a dummy read to clear the interrupt
 //	A one character read appars to be enough.
 
-  //printf("x: %d", x);
   if (x > 0)
   {
     lseek (fd, 0, SEEK_SET) ;	// Rewind
@@ -310,7 +308,6 @@ static void *interruptHandler (UNU void *arg)
 
   while (allowCheckForInterrupt) {
     if (waitForInterrupt (myPin, -1) > 0) {
-      //printf("interrupt\n");
       isrFunctions [myPin] () ;
     }
   }
@@ -368,7 +365,7 @@ int gpio_set_edge(unsigned int gpio, unsigned int mode)
       int fd;
       char filename[29];
 
-      printf("Setting edge\n");
+      DEBUG_PRINT("Setting edge\n");
       snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/edge", gpio, strerror (errno));
 
       if ((fd = open(filename, O_WRONLY)) < 0) {
@@ -377,7 +374,7 @@ int gpio_set_edge(unsigned int gpio, unsigned int mode)
 
       write(fd, modeS, strlen(modeS) + 1);
       close(fd);
-      printf("finished setting edge\n");
+      DEBUG_PRINT("finished setting edge\n");
     }
     else		// Parent, wait
       wait (NULL) ;
@@ -407,17 +404,17 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
   char gpioDirName[64];
   snprintf(gpioDirName, sizeof(gpioDirName), "/sys/class/gpio/gpio%d", gpioPin);
 
-  printf("dirName: %s \n", gpioDirName);
+  DEBUG_PRINT("dirName: %s \n", gpioDirName);
   if (access (gpioDirName, X_OK) == -1) {
       // gpio export
       int fd, len;
       char str_gpio[4];
 
-      printf("Exporting\n");
+      DEBUG_PRINT("Exporting\n");
       if ((fd = open("/sys/class/gpio/export", O_WRONLY)) < 0)
           return -1;
 
-      printf("Finished exporting");
+      DEBUG_PRINT("Finished exporting");
       len = snprintf(str_gpio, sizeof(str_gpio), "%d", gpioPin);
       write(fd, str_gpio, len);
       close(fd);
@@ -426,7 +423,7 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
   if (gpio_set_direction(gpioPin, 1) == -1) {
       return wiringPiFailure (WPI_FATAL, "wiringPiISR: direction failed\n", strerror (errno)) ;
   }
-  printf("finished setting direction\n");
+  DEBUG_PRINT("finished setting direction\n");
 // Now export the pin and set the right edge
 //	We're going to use the gpio program to do this, so it assumes
 //	a full installation of wiringPi. It's a bit 'clunky', but it
@@ -438,9 +435,9 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
   if (sysFds [bcmPin] == -1)
   {
     sprintf (fName, "/sys/class/gpio/gpio%d/value", gpioPin) ;
-    printf("opening %s\n", fName);
+    DEBUG_PRINT("opening %s\n", fName);
     if ((sysFds [bcmPin] = open (fName, O_RDWR)) < 0) {
-      printf("failed open");
+      DEBUG_PRINT("failed open");
       return wiringPiFailure (WPI_FATAL, "wiringPiISR: unable to open %s: %s\n", fName, strerror (errno)) ;
     }
   }
@@ -448,7 +445,7 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
 // Clear any initial pending interrupt
 
   ioctl (sysFds [bcmPin], FIONREAD, &count) ;
-  printf("ioctl count: %d\n", count);
+  DEBUG_PRINT("ioctl count: %d\n", count);
   for (i = 0 ; i < count ; ++i) {
     read (sysFds [bcmPin], &c, 1);
   }
@@ -461,7 +458,7 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
     while (pinPass != -1) {
       delay (1) ;
     }
-    printf("Finished setting up thread\n");
+    DEBUG_PRINT("Finished setting up thread\n");
   pthread_mutex_unlock (&pinMutex) ;
   return 0;
 }

@@ -20,6 +20,12 @@
 #define UNU __attribute__((unused))
 // Interrupt levels
 
+#ifdef DEBUG
+#define DEBUG_PRINT(fmt, args...)    fprintf(stderr, fmt, ## args)
+#else
+#define DEBUG_PRINT(fmt, args...)    /* Don't do anything in release builds */
+#endif
+
 #define	INT_EDGE_SETUP		0
 #define	INT_EDGE_FALLING	1
 #define	INT_EDGE_RISING		2
