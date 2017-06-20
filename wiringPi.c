@@ -98,17 +98,23 @@ int wiringPiSetup()
 
 int digitalRead(int gpio)
 {
-  return input_gpio(gpio);
+  int gpioPin = get_gpio_number(gpio);
+
+  return input_gpio(gpioPin);
 }
 
 void digitalWrite(int gpio, int value)
 {
-  output_gpio(gpio, value);
+  int gpioPin = get_gpio_number(gpio);
+
+  output_gpio(gpioPin, value);
 }
 
 void pinMode(int gpio, int direction)
 {
-  setup_gpio(gpio, direction, PUD_UP);
+  int gpioPin = get_gpio_number(gpio);
+
+  setup_gpio(gpioPin, direction, PUD_UP);
 }
 
 //
