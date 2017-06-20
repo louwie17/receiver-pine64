@@ -24,6 +24,7 @@ int RECEIVER_PIN = 71;
 
 static const char* bin2tristate(const char* bin);
 static char * dec2binWzerofill(unsigned long Dec, unsigned int bitLength);
+static char strToChar(const char* bin);
 
 void output(unsigned long decimal, unsigned int length, unsigned int delay, unsigned int* raw, unsigned int protocol) {
 
@@ -31,11 +32,12 @@ void output(unsigned long decimal, unsigned int length, unsigned int delay, unsi
     printf("Unknown encoding.");
   } else {
     const char* b = dec2binWzerofill(decimal, length);
-    printf("Decimal: %lu", decimal);
+    /*printf("Decimal: %lu", decimal);
     printf(" (%d Bit) Binary: %s", length, b);
-    printf(" Tri-State: %s", bin2tristate( b));
-    printf(" PulseLength: %d", delay);
-    printf(" microseconds Protocol: %d\n", protocol);
+    printf(" Tri-State: %s", bin2tristate( b));*/
+    printf(" String: %c \n", strToChar(b));
+    /*printf(" PulseLength: %d", delay);
+    printf(" microseconds Protocol: %d\n", protocol);*/
   }
   
   printf("Raw data: ");
@@ -64,6 +66,16 @@ static const char* bin2tristate(const char* bin) {
   }
   returnValue[pos2] = '\0';
   return returnValue;
+}
+
+static char strToChar(const char* str) {
+    char parsed = 0;
+    for (int i = 0; i < 8; i++) {
+        if (str[i] == '1') {
+            parsed |= 1 << (7 - i);
+        }
+    }
+    return parsed;
 }
 
 static char * dec2binWzerofill(unsigned long Dec, unsigned int bitLength) {

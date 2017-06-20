@@ -5,6 +5,11 @@
 #include "RCSwitch.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <bitset>
+#include <iostream>
+#include <sstream>
+#include <string>
+using namespace std;
 
 int TRANSMITTER_PIN = 71;
 
@@ -30,31 +35,18 @@ int main(int argc, char *argv[])
     if (wiringPiSetup () == -1) return 1;
     printf("Using pin: %d\n", TRANSMITTER_PIN);
     RCSwitch mySwitch = RCSwitch();
+    //mySwitch.setRepeatTransmit(5);
     mySwitch.enableTransmit(TRANSMITTER_PIN);
 
-    /* See Example: TypeA_WithDIPSwitches */
-    mySwitch.switchOn("11111", "00010");
-    delay(1000);
-    mySwitch.switchOff("11111", "00010");
-    delay(1000);
-
-    /* Same switch as above, but using decimal code */
-    mySwitch.send(5393, 24);
-    delay(1000);
-    mySwitch.send(5396, 24);
+    string myString = "Hello World";
+    string send = "";
+    for (std::size_t i = 0; i < myString.size(); ++i) {
+        ostringstream stream;
+        stream << bitset<8>(myString.c_str()[i]) << endl;
+        send.append(stream.str());
+    }
+    mySwitch.send(send.c_str());
     delay(1000);
 
-    /* Same switch as above, but using binary code */
-    mySwitch.send("000000000001010100010001");
-    delay(1000);
-    mySwitch.send("000000000001010100010100");
-    delay(1000);
-
-    /* Same switch as above, but tri-state code */
-    mySwitch.sendTriState("00000FFF0F0F");
-    delay(1000);
-    mySwitch.sendTriState("00000FFF0FF0");
-
-    delay(1000);
     return 0;
 }
