@@ -14,9 +14,11 @@
 
  
 Transmitter::Transmitter(){
+    if (wiringPiSetup () == -1)
+        printf("Failed wiring setup\n");
 	this->mySwitch = RCSwitch();
 	this->setDelay(10);
-	this->setPin(10);
+	//this->setPin(10);
 	this->setOID(288);
 	this->sending = false;
 }
@@ -55,6 +57,7 @@ void Transmitter::sendString(char *str) {
 	char * beginString = this->createFrame(this->OID, 0, concat(int2bin(2, sizeChar), int2bin(0, sizeChar)));
 	this->send(beginString);
 	free(beginString);
+    printf("1\n");
 	uint8_t i = 0;
 	for (; i < strlen(str); i = i+2){
 		char * data = (char *) malloc(sizeDataByte);
@@ -64,6 +67,7 @@ void Transmitter::sendString(char *str) {
 			char * data2 = int2bin(str[i+1], sizeChar);
 			data = this->concat(data, data2);
 			free(data2);
+            printf("2\n");
 		}else{
 			data = this->concat(data, "00000000");
 		}
@@ -73,11 +77,19 @@ void Transmitter::sendString(char *str) {
 			cnt = 1;
 		char * frame = this->createFrame(this->OID, cnt, data);
 		this->send(frame);
-		free(data1);free(data);free(frame);
+		free(data1);
+        printf("3\n");
+        free(data);
+        printf("4\n");
+        free(frame);
+        printf("5\n");
 	}
 	char * endString = this->createFrame(this->OID, 0, this->concat(this->int2bin(3, sizeChar), this->int2bin(cnt, sizeChar)));
 	this->send(endString);
-	free(str);free(endString);free(&cnt);free(&i);
+	//free(str);printf("6\n");
+    free(endString);printf("7\n");
+    //free(&cnt);printf("8\n");
+    //free(&i);printf("9\n");
 	this->sending = false;
 }
 

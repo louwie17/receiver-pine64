@@ -2,6 +2,7 @@ SOURCES = c_gpio.c piHiPri.c wiringPi.c
 RCSWITCH_SOURCES = $(SOURCES) RCSwitch.cpp
 FLAGS = -fpermissive -lpthread -pthread -Wno-write-strings
 
+all: receiverMain transmitterMain
 receiverMain: receiverMain.cpp
 		g++ $(FLAGS) -o receiverMain receiverMain.cpp $(RCSWITCH_SOURCES) Receiver.cpp
 

@@ -9,7 +9,7 @@ Transmitter myTransmitter;
 
 int TRANSMITTER_PIN = 71;
 // The char to transmit
-char * strToSend = "he";
+char * strToSend = "hello world!";
 
 int main(int argc, char *argv[])
 {
@@ -31,8 +31,9 @@ int main(int argc, char *argv[])
     done:
 
     myTransmitter = Transmitter();
-    myTransmitter.setDelay(1);
+    myTransmitter.setDelay(10);
     myTransmitter.setPin(TRANSMITTER_PIN);
+    myTransmitter.setOID(288);
 
     myTransmitter.sendString(strToSend);
     return 0;

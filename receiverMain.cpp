@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
 
   myReceiver = Receiver();
   myReceiver.setPin(RECEIVER_PIN);
+  myReceiver.setOID(288);
 
   signal(SIGINT, cleanupReceiver);
 

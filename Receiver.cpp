@@ -20,13 +20,13 @@ Receiver::Receiver(){
     if(wiringPiSetup() == -1)
 		printf("Error in initializing wiringpi\n");
     this->mySwitch = RCSwitch();
-    this->setPin(Receiver::PIN);
+    //this->setPin(Receiver::PIN);
 	this->setOID(288);
 }
 
 void Receiver::setPin(int pin){
 	this->PIN = pin;
-    this->mySwitch.enableReceive(pin);
+    this->mySwitch.enableReceive(0, pin);
 }
 
 void Receiver::setOID(int oid){
@@ -160,6 +160,7 @@ char * Receiver::receiveData(){
 	strcpy(this->oldValue, "00000000000000000000000000000000");
 	do{
 		if (this->mySwitch.available()) {
+            //printf("received value\n");
 			int value = this->mySwitch.getReceivedValue();
 			this->mySwitch.resetAvailable();
 			char * frame = int2bin(value, lengthFrame);
@@ -182,6 +183,8 @@ char * Receiver::receiveData(){
 		  }
 	}while(!this->received);
 	this->received = false;
+    sleep(1);
+    this->mySwitch.resetAvailable();
 	if(this->isCommand){
 		return this->theCmd;
 	}else if(this->isString){
