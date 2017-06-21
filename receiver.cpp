@@ -1,128 +1,191 @@
-/*
- * http://joey.hazlett.us/pine64/pine64_pins.html
- * Interruptable pins I know so far:
- * 3 -> 227
- * 5 -> 226
- */
-#include "wiringPi.h"
-#include "RCSwitch.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <sys/resource.h>
-#include <errno.h>
-#include <unistd.h>
-#include <string.h>
-#include <signal.h>
+#include "Receiver.h"
 
-#define MAX_TIMINGS	  86
+const int lengthFrame = 32;
+const int lengthOID = 10;
+const int lengthNumPacket = 5;
+const int lengthData = 16;
+const int lengthChar = 8;
+//Last Bit is for parity bit
 
 
-RCSwitch mySwitch = RCSwitch();
-
-int RECEIVER_PIN = 71;
-
-static const char* bin2tristate(const char* bin);
-static char * dec2binWzerofill(unsigned long Dec, unsigned int bitLength);
-
-void output(unsigned long decimal, unsigned int length, unsigned int delay, unsigned int* raw, unsigned int protocol) {
-
-  if (decimal == 0) {
-    printf("Unknown encoding.");
-  } else {
-    const char* b = dec2binWzerofill(decimal, length);
-    printf("Decimal: %lu", decimal);
-    printf(" (%d Bit) Binary: %s", length, b);
-    printf(" Tri-State: %s", bin2tristate( b));
-    printf(" PulseLength: %d", delay);
-    printf(" microseconds Protocol: %d\n", protocol);
-  }
-  
-  printf("Raw data: ");
-  for (unsigned int i=0; i<= length*2; i++) {
-    printf("%d,", raw[i]);
-  }
-  printf("\n\n");
+Receiver::Receiver(){
+	this->PIN = 2;
+	this->received = false;
+	this->oldNumPacket = 0;
+	this->isString = false;
+	this->isCommand = false;
+	this->oldValue = (char *) malloc(lengthFrame);
+	this->theStr = (char *) malloc(2);
+	this->theCmd = (char *) malloc(lengthChar);;
+    if(wiringPiSetup() == -1)
+		printf("Error in initializing wiringpi\n");
+    this->mySwitch = RCSwitch();
+    this->setPin(Receiver::PIN);
+	this->setOID(288);
 }
 
-static const char* bin2tristate(const char* bin) {
-  static char returnValue[50];
-  int pos = 0;
-  int pos2 = 0;
-  while (bin[pos]!='\0' && bin[pos+1]!='\0') {
-    if (bin[pos]=='0' && bin[pos+1]=='0') {
-      returnValue[pos2] = '0';
-    } else if (bin[pos]=='1' && bin[pos+1]=='1') {
-      returnValue[pos2] = '1';
-    } else if (bin[pos]=='0' && bin[pos+1]=='1') {
-      returnValue[pos2] = 'F';
-    } else {
-      return "not applicable";
-    }
-    pos = pos+2;
-    pos2++;
-  }
-  returnValue[pos2] = '\0';
-  return returnValue;
+void Receiver::setPin(int pin){
+	this->PIN = pin;
+    this->mySwitch.enableReceive(pin);
 }
 
-static char * dec2binWzerofill(unsigned long Dec, unsigned int bitLength) {
-  static char bin[64];
-  unsigned int i=0;
+void Receiver::setOID(int oid){
+    this->OID = oid;
+}
+ 
+char * Receiver::int2bin(int i, int size){
+    char * str = (char *) malloc(size + 1);
+    if(!str) return NULL;
+    str[size] = 0;
 
-  while (Dec > 0) {
-    bin[32+i++] = ((Dec & 1) > 0) ? '1' : '0';
-    Dec = Dec >> 1;
-  }
+    // type punning because signed shift is implementation-defined
+    unsigned u = *(unsigned *)&i;
+    for(; size--; u >>= 1)
+      str[size] = u & 1 ? '1' : '0';
 
-  for (unsigned int j = 0; j< bitLength; j++) {
-    if (j >= bitLength - i) {
-      bin[j] = bin[ 31 + i - (j - (bitLength - i)) ];
-    } else {
-      bin[j] = '0';
-    }
-  }
-  bin[bitLength] = '\0';
+    return str;
+} 
 
-  return bin;
+char * Receiver::getFromFrame(char * frame, int size, int offset){
+	char * raw = (char *) malloc(size);
+	for (int i=0;i<size;i++) {
+		if (i < size) {
+			raw[i] = frame[offset + i];
+		}
+	}
+	return raw;
 }
 
-void cleanupReceiver(int dummy) {
-  wiringPiCleanup();
-  exit(1);
+int Receiver::intFromBinary(char *s){
+  return (int) strtol(s, NULL, 2);
 }
 
-int main(int argc, char *argv[])
-{
-
-    while (true) {
-        switch (getopt(argc, argv, "d:r:p:s:")) {
-            case -1:
-                goto done;
-
-            case 'p':
-                RECEIVER_PIN = atoi(optarg);
-                break;
-
-            default: /* '?' */
-                break;
-        }
-    }
-
-    done:
-
-    if (wiringPiSetup () == -1) return 1;
-    printf("Using pin: %d\n", RECEIVER_PIN);
-    RCSwitch mySwitch = RCSwitch();
-    mySwitch.enableReceive(0, RECEIVER_PIN);
-
-  signal(SIGINT, cleanupReceiver);
-
-    while (1) {
-        if (mySwitch.available()) {
-            output(mySwitch.getReceivedValue(), mySwitch.getReceivedBitlength(), mySwitch.getReceivedDelay(), mySwitch.getReceivedRawdata(),mySwitch.getReceivedProtocol());
-            mySwitch.resetAvailable();
-        }
-    }
-    return 0;
+char * Receiver::dataFromBinary(char *s){
+	char * data1 = getFromFrame(s, lengthChar, 0);
+	char * data2 = getFromFrame(s, lengthChar, lengthChar);
+	char * data = (char *) malloc(2) ;
+	data[0] = (char) intFromBinary(data1);
+	data[1] = (char) intFromBinary(data2);
+	return data;
 }
+
+ 
+bool Receiver::isBad(char * frame){
+	int numberOfOnes = 0;
+	char parityBit = frame[strlen(frame)-1];
+	for (int i = 0; i < strlen(frame)-1; i++){
+		if (frame[i] == '1')
+		numberOfOnes++;
+	}
+	if((numberOfOnes % 2 == 0 && parityBit == '1') || (numberOfOnes % 2 == 1 && parityBit == '0'))
+		return true;
+	return false;
+}
+
+char * Receiver::concat(char * str1, char * str2){
+  char * str3 = (char *) malloc(1 + strlen(str1)+ strlen(str2) );
+  strcpy(str3, str1);
+  strcat(str3, str2);
+  return str3;
+}
+
+bool Receiver::getIsString(){
+	return this->isString;
+}
+
+bool Receiver::getIsCommand(){
+	return this->isCommand;
+}
+
+void Receiver::onDataReceived(int oid, int numPacket, char * rawData){
+	if(oid == this->OID){
+		if(numPacket == 0){
+			// If numPAcket == 0 it's a request
+			
+			char * rawDataPart1 = getFromFrame(rawData, lengthChar, 0);
+			char * rawDataPart2 = getFromFrame(rawData, lengthChar, lengthChar);
+			
+			int request = intFromBinary(rawDataPart1);
+			if(request == 1){
+				// Command
+				this->received = true;
+				this->isCommand = true;
+				this->theStr = (char *) malloc(2);
+				this->oldNumPacket = 0;
+				this->isString = false;
+				this->theCmd = dataFromBinary(rawDataPart2);
+			}else if (request == 2) { 
+				// Start message
+				this->theStr = (char *) malloc(2);
+				this->oldNumPacket = 0;
+				this->isCommand = false;
+				this->isString = true;
+			}else if(request == 3){
+				this->isCommand = false;
+				int param = intFromBinary(rawDataPart2);
+				if(param == this->oldNumPacket){
+					// End message
+					this->received = true;
+				}else{
+					//printf("Error \n");
+				}
+			}
+		}else{
+			if(this->isString){
+				char * data = dataFromBinary(rawData);
+				//printf("%d ", numPacket);
+				if(numPacket == this->oldNumPacket+1 || (oldNumPacket == 31 && numPacket == 1) ){
+					this->oldNumPacket++;
+					this->theStr = this->concat(theStr, data);
+				}else{
+					//printf("Error in reception \n");
+					this->theStr = (char *) malloc(2);
+					this->oldNumPacket = 0;
+					this->isString = false;
+				}
+			}
+		}
+	}
+}
+
+char * Receiver::receiveData(){
+
+	// printf("################# \n");
+	// printf("#   Receiving   # \n");
+	// printf("################# \n");
+	this->isString = false;
+	this->isCommand = false;
+	this->theStr =  (char *) malloc(2);
+	this->oldNumPacket = 0;
+	strcpy(this->oldValue, "00000000000000000000000000000000");
+	do{
+		if (this->mySwitch.available()) {
+			int value = this->mySwitch.getReceivedValue();
+			this->mySwitch.resetAvailable();
+			char * frame = int2bin(value, lengthFrame);
+			
+			if (strcmp(frame, this->oldValue) != 0 && !isBad(frame)) {
+				strcpy(this->oldValue, frame);
+				//printf("%s \n", frame);
+				
+				int offset = 0;
+				char * rawOID = getFromFrame(frame, lengthOID, offset);
+				int oid = intFromBinary(rawOID);
+				offset += lengthOID;
+				char * rawNumPacket = getFromFrame(frame, lengthNumPacket, offset);
+				offset += lengthNumPacket;
+				char * rawDATA = getFromFrame(frame, lengthData, offset);
+				int numPacket = intFromBinary(rawNumPacket);
+				
+				this->onDataReceived(oid, numPacket, rawDATA);
+			}
+		  }
+	}while(!this->received);
+	this->received = false;
+	if(this->isCommand){
+		return this->theCmd;
+	}else if(this->isString){
+		return this->theStr;
+	}
+}
+

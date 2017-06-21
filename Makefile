@@ -2,17 +2,17 @@ SOURCES = c_gpio.c piHiPri.c wiringPi.c
 RCSWITCH_SOURCES = $(SOURCES) RCSwitch.cpp
 FLAGS = -fpermissive -lpthread -pthread -Wno-write-strings
 
-receiver: receiver.cpp
-		g++ $(FLAGS) -o receiver receiver.cpp $(RCSWITCH_SOURCES)
+receiverMain: receiverMain.cpp
+		g++ $(FLAGS) -o receiverMain receiverMain.cpp $(RCSWITCH_SOURCES) Receiver.cpp
 
-debug-receiver: receiver.cpp
-		g++ -DEBUG $(FLAGS) -o receiver receiver.cpp $(RCSWITCH_SOURCES)
+debug-receiverMain: receiverMain.cpp
+		g++ -DEBUG $(FLAGS) -o receiverMain receiverMain.cpp $(RCSWITCH_SOURCES) Receiver.cpp
 
-transmitter: transmitter.cpp
-		g++ $(FLAGS) -o transmitter transmitter.cpp $(RCSWITCH_SOURCES)
+transmitterMain: transmitterMain.cpp
+		g++ $(FLAGS) -o transmitterMain transmitterMain.cpp $(RCSWITCH_SOURCES) Transmitter.cpp
 
-debug-transmitter: transmitter.cpp
-		g++ -DEBUG $(FLAGS) -o transmitter transmitter.cpp $(RCSWITCH_SOURCES)
+debug-transmitterMain: transmitterMain.cpp
+		g++ -DEBUG $(FLAGS) -o transmitterMain transmitterMain.cpp $(RCSWITCH_SOURCES) Transmitter.cpp
 
 clean:
-	rm receiver transmitter
+	rm receiverMain transmitterMain
