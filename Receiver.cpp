@@ -160,7 +160,7 @@ char * Receiver::receiveData(){
 	strcpy(this->oldValue, "00000000000000000000000000000000");
 	do{
 		if (this->mySwitch.available()) {
-            //printf("received value\n");
+            printf("received value\n");
 			int value = this->mySwitch.getReceivedValue();
 			this->mySwitch.resetAvailable();
 			char * frame = int2bin(value, lengthFrame);
