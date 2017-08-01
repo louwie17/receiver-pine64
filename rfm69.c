@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
 
 //#define SPI_SPEED 1000000
 #define SPI_SPEED 2000000
@@ -116,7 +117,7 @@ void rfm69_writeReg(char addr, char value) {
   thedata[1] = value;
 
   wiringPiSPIDataRW(SPI_DEVICE, thedata, 2);
-  usleep(5);
+  usleep(5000);
 }
 
 
@@ -126,7 +127,7 @@ char rfm69_readReg(char addr) {
   thedata[1] = 0;
 
   wiringPiSPIDataRW(SPI_DEVICE, thedata, 2);
-  usleep(5);
+  usleep(5000);
 
   return thedata[1];
 }
@@ -169,7 +170,7 @@ void rfm69_encrypt(const char* key) {
     }
 
     wiringPiSPIDataRW(SPI_DEVICE, thedata, 17);
-    usleep(5);
+    usleep(5000);
   }
 
   rfm69_writeReg(REG_PACKETCONFIG2, (rfm69_readReg(REG_PACKETCONFIG2) & 0xFE) | (key ? 1 : 0));

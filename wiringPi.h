@@ -16,6 +16,7 @@
 #  define	FALSE	(!TRUE)
 #endif
 #define	WPI_FATAL	(1==1)
+#define WPI_ALMOST  (1==2)
 
 #define UNU __attribute__((unused))
 // Interrupt levels
@@ -31,7 +32,9 @@
 #define	INT_EDGE_RISING		2
 #define	INT_EDGE_BOTH		3
 
-int wiringPiSetup();
+extern int wiringPiFailture (int fatal, const char *message, ...);
+
+extern int wiringPiSetup();
 void wiringPiCleanup();
 int digitalRead(int gpio);
 void digitalWrite(int gpio, int value);

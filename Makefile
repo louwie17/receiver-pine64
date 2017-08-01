@@ -14,5 +14,7 @@ transmitter: transmitter.cpp
 debug-transmitter: transmitter.cpp
 		g++ -DEBUG $(FLAGS) -o transmitter transmitter.cpp $(RCSWITCH_SOURCES)
 
+test-rfm: test_rfm69.c
+	gcc $(FLAGS) -o test_rfm test_rfm69.c rfm69.c wiringPiSPI.c $(SOURCES)
 clean:
 	rm receiver transmitter
