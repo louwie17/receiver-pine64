@@ -19,6 +19,7 @@
 #include <sys/ioctl.h>
 #include <asm/ioctl.h>
 
+#include "c_gpio.h"
 #include "wiringPi.h"
 
 //
@@ -123,11 +124,11 @@ void pinMode(int gpio, int direction)
 
 void initialiseEpoch (void)
 {
-  struct timeval tv ;
+  struct timespec ts ;
 
-  gettimeofday (&tv, NULL) ;
-  epochMilli = (uint64_t)tv.tv_sec * (uint64_t)1000    + (uint64_t)(tv.tv_usec / 1000) ;
-  epochMicro = (uint64_t)tv.tv_sec * (uint64_t)1000000 + (uint64_t)(tv.tv_usec) ;
+  clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
+  epochMilli = (uint64_t)ts.tv_sec * (uint64_t)1000    + (uint64_t)(ts.tv_nsec / 1000000L) ;
+  epochMicro = (uint64_t)ts.tv_sec * (uint64_t)1000000 + (uint64_t)(ts.tv_nsec /    1000L) ;
 }
 
 void delayMicrosecondsHard (unsigned int howLong)
@@ -173,22 +174,20 @@ void delay (unsigned int howLong)
 
 unsigned int millis (void)
 {
-  struct timeval tv ;
-  uint64_t now ;
+  struct  timespec ts ;
 
-  gettimeofday (&tv, NULL) ;
-  now  = (uint64_t)tv.tv_sec * (uint64_t)1000 + (uint64_t)(tv.tv_usec / 1000) ;
+  clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
+  now  = (uint64_t)ts.tv_sec * (uint64_t)1000 + (uint64_t)(ts.tv_nsec / 1000000L) ;
 
   return (uint32_t)(now - epochMilli) ;
 }
 
 unsigned int micros (void)
 {
-  struct timeval tv ;
-  uint64_t now ;
+  struct  timespec ts ;
 
-  gettimeofday (&tv, NULL) ;
-  now  = (uint64_t)tv.tv_sec * (uint64_t)1000000 + (uint64_t)tv.tv_usec ;
+  clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
+  now  = (uint64_t)ts.tv_sec * (uint64_t)1000000 + (uint64_t)(ts.tv_nsec / 1000) ;
 
   return (uint32_t)(now - epochMicro) ;
 }
