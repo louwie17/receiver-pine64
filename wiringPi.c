@@ -174,6 +174,7 @@ void delay (unsigned int howLong)
 
 unsigned int millis (void)
 {
+  uint64_t now ;
   struct  timespec ts ;
 
   clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
@@ -184,6 +185,7 @@ unsigned int millis (void)
 
 unsigned int micros (void)
 {
+  uint64_t now ;
   struct  timespec ts ;
 
   clock_gettime (CLOCK_MONOTONIC_RAW, &ts) ;
