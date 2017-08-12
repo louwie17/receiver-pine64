@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
   //if (argc != 2) uso();
   int i;
 
-  rfm69_initialize(FREQUENCY, NODEID, NETWORKID);
+  rfm69_initialize(FREQUENCY, NODEID, NETWORKID, NULL);
 
   //rfm69_readAllRegs();
   //printf("RSSI: %i", rfm69_readRSSI(0));
