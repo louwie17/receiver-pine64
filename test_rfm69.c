@@ -11,10 +11,10 @@
 
 #define FREQUENCY RF69_915MHZ
 #define NODEID 1
-#define NETWORKID 100
+#define NETWORKID 0
 #define TXPOWER 31
 // A 16 bit password
-#define CRYPTPASS "0123456789012345"
+#define CRYPTPASS "TOPSECRETPASSWRD"
 
 char received[63];
 int rssi;
