@@ -31,6 +31,7 @@ int main(int argc, char* argv[]) {
   //if (argc != 2) uso();
   int i;
 
+  wiringPiSetup()
   rfm69_initialize(FREQUENCY, NODEID, NETWORKID, NULL);
 
   //rfm69_readAllRegs();
