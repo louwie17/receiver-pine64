@@ -360,9 +360,9 @@ char rfm69_getSenderId(void) {
 void rfm69_send(char toAddress, const void* buffer, char bufferSize, char requestACK) {
   rfm69_writeReg(REG_PACKETCONFIG2, (rfm69_readReg(REG_PACKETCONFIG2) & 0xFB) | RF_PACKET2_RXRESTART); // avoid RX deadlocks
   // Avoiding sending when another node is sending now
-  //printf("I will check if I can send\n\r");
+  printf("I will check if I can send\n\r");
   // I don't know why this function doesn't work
-  //while(rfm69_canSend() != 0);
+  while(rfm69_canSend() != 0);
   rfm69_sendFrame(toAddress, buffer, bufferSize, requestACK, 0x00);
 }
 
@@ -370,14 +370,14 @@ void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char r
   char thedata[63];
   char i;
 
-  //printf("Prepared to send a new frame\n\r");
+  printf("Prepared to send a new frame\n\r");
 
   rfm69_setMode(RF69_MODE_STANDBY); //turn off receiver to prevent reception while filling fifo
   while ((rfm69_readReg(REG_IRQFLAGS1) & RF_IRQFLAGS1_MODEREADY) == 0x00); // Wait for ModeReady
   ////writeReg(REG_DIOMAPPING1, RF_DIOMAPPING1_DIO0_00); // DIO0 is "Packet Sent"
   if (bufferSize > MAX_DATA_LEN) bufferSize = MAX_DATA_LEN;
 
-  //printf("Preparing the packet\n\r");
+  printf("Preparing the packet\n\r");
 
   for(i = 0; i < 63; i++) thedata[i] = 0;
 
