@@ -264,7 +264,7 @@ void rfm69_receive(void) {
   while(1) {
     if (rfm69_readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_PAYLOADREADY)
       rfm69_writeReg(REG_PACKETCONFIG2, (rfm69_readReg(REG_PACKETCONFIG2) & 0xFB) | RF_PACKET2_RXRESTART); // avoid RX deadlocks
-    ////writeReg(REG_DIOMAPPING1, RF_DIOMAPPING1_DIO0_01); //set DIO0 to "PAYLOADREADY" in receive mode
+    rfm69_writeReg(REG_DIOMAPPING1, RF_DIOMAPPING1_DIO0_01); //set DIO0 to "PAYLOADREADY" in receive mode
     rfm69_setMode(RF69_MODE_RX);
 
     //printf("Ya estoy en modo RX\n\r");
@@ -377,7 +377,7 @@ void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char r
 
   rfm69_setMode(RF69_MODE_STANDBY); //turn off receiver to prevent reception while filling fifo
   while ((rfm69_readReg(REG_IRQFLAGS1) & RF_IRQFLAGS1_MODEREADY) == 0x00); // Wait for ModeReady
-  writeReg(REG_DIOMAPPING1, RF_DIOMAPPING1_DIO0_00); // DIO0 is "Packet Sent"
+  rfm69_writeReg(REG_DIOMAPPING1, RF_DIOMAPPING1_DIO0_00); // DIO0 is "Packet Sent"
   if (bufferSize > MAX_DATA_LEN) bufferSize = MAX_DATA_LEN;
 
   printf("Preparing the packet\n\r");
