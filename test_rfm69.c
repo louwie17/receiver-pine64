@@ -11,6 +11,7 @@
 
 #define FREQUENCY RF69_915MHZ
 #define NODEID 1
+#define TONODEID 2
 #define NETWORKID 0
 #define TXPOWER 31
 // A 16 bit password
@@ -37,7 +38,10 @@ int main(int argc, char* argv[]) {
 
   rfm69_encrypt(CRYPTPASS);
   rfm69_setPowerLevel(TXPOWER); // Max Power
-
+  if (strcmp(argv[1], "-s") == 0 && strlen(argv[2]) != 1) {
+    rfm69_send(TONODEID, (const void*) argv[2], strlen(argv[2]), 1);
+    return;
+  }
 
   while(1) {
     rfm69_receive();
