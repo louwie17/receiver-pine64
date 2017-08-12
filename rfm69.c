@@ -19,6 +19,7 @@
 //#define SPI_SPEED 1000000
 #define SPI_SPEED 2000000
 #define SPI_DEVICE 0
+#define INTERRUPT_PIN 25
 
 //char DATA[MAX_DATA_LEN];
 char _mode;       // current transceiver state
@@ -32,11 +33,13 @@ char PAYLOADLEN;
 char ACK_REQUESTED;
 char ACK_RECEIVED; /// Should be polled immediately after sending a packet with ACK request
 int RSSI; //most accurate RSSI during reception (closest to the reception)
+int _interruptPin;
 char DATA[63];
 char CTLBYTE;
 
 
-int rfm69_initialize(char freqBand, char nodeID, char networkID) {
+int rfm69_initialize(char freqBand, char nodeID, char networkID, int interruptPin) {
+  _interruptPin = interruptPin || INTERRUPT_PIN;
 char i;
 const char CONFIG[][2] = {
     // Operation Mode: Sequencer ON, Listen Mode OFF, Standby mode
@@ -374,7 +377,7 @@ void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char r
 
   rfm69_setMode(RF69_MODE_STANDBY); //turn off receiver to prevent reception while filling fifo
   while ((rfm69_readReg(REG_IRQFLAGS1) & RF_IRQFLAGS1_MODEREADY) == 0x00); // Wait for ModeReady
-  ////writeReg(REG_DIOMAPPING1, RF_DIOMAPPING1_DIO0_00); // DIO0 is "Packet Sent"
+  writeReg(REG_DIOMAPPING1, RF_DIOMAPPING1_DIO0_00); // DIO0 is "Packet Sent"
   if (bufferSize > MAX_DATA_LEN) bufferSize = MAX_DATA_LEN;
 
   printf("Preparing the packet\n\r");
@@ -398,10 +401,10 @@ void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char r
 
   /* no need to wait for transmit mode to be ready since its handled by the radio */
   rfm69_setMode(RF69_MODE_TX);
-  ////while (digitalRead(_interruptPin) == 0); //wait for DIO0 to turn HIGH signalling transmission finish
-  ////delay(10);
-  //printf("Changing to TX mode\n\r");
+  while (digitalRead(_interruptPin) == 0); //wait for DIO0 to turn HIGH signalling transmission finish
+  delay(10);
+  printf("Changing to TX mode\n\r");
   while (!(rfm69_readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_PACKETSENT)); // Wait for ModeReady
   rfm69_setMode(RF69_MODE_STANDBY);
-  //printf("Done, Changing to standby mode\n\r");
+  printf("Done, Changing to standby mode\n\r");
 }
