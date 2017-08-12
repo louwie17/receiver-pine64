@@ -34,6 +34,7 @@
 #define RF69_BROADCAST_ADDR 255
 
 
+int rfm69_initialize(char freqBand, char nodeID, char networkID);
 int rfm69_initialize(char freqBand, char nodeID, char networkID, int interruptPin);
 void rfm69_writeReg(char addr, char value);
 char rfm69_readReg(char addr);
