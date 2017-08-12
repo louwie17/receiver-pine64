@@ -360,9 +360,9 @@ char rfm69_getSenderId(void) {
 void rfm69_send(char toAddress, const void* buffer, char bufferSize, char requestACK) {
   rfm69_writeReg(REG_PACKETCONFIG2, (rfm69_readReg(REG_PACKETCONFIG2) & 0xFB) | RF_PACKET2_RXRESTART); // avoid RX deadlocks
   // Avoiding sending when another node is sending now
-  printf("I will check if I can send\n\r");
+  //printf("I will check if I can send\n\r");
   // I don't know why this function doesn't work
-  while(rfm69_canSend() != 0);
+  //while(rfm69_canSend() != 0);
   rfm69_sendFrame(toAddress, buffer, bufferSize, requestACK, 0x00);
 }
 
@@ -392,7 +392,7 @@ void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char r
     thedata[i + 5] = ((char*)buffer)[i];
   }
 
-  //printf("Sending by SPI\n\r");
+  printf("Sending by SPI\n\r");
 
   wiringPiSPIDataRW(SPI_DEVICE, thedata, bufferSize + 5);
 
