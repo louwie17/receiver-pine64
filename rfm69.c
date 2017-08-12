@@ -40,6 +40,7 @@ char CTLBYTE;
 
 int rfm69_initialize(char freqBand, char nodeID, char networkID, int interruptPin) {
   _interruptPin = interruptPin || INTERRUPT_PIN;
+  pinMode(_interruptPin, INPUT)
 char i;
 const char CONFIG[][2] = {
     // Operation Mode: Sequencer ON, Listen Mode OFF, Standby mode
