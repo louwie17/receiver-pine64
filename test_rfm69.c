@@ -38,9 +38,12 @@ int main(int argc, char* argv[]) {
 
   rfm69_encrypt(CRYPTPASS);
   rfm69_setPowerLevel(TXPOWER); // Max Power
-  if (strcmp(argv[1], "-s") == 0 && strlen(argv[2]) != 1) {
-    rfm69_send(TONODEID, (const void*) argv[2], strlen(argv[2]), 1);
-    return;
+  if (argc == 2) {
+    if (strcmp(argv[1], "-s") == 0 && strlen(argv[2]) != 1)
+    {
+      rfm69_send(TONODEID, (const void *)argv[2], strlen(argv[2]), 1);
+      return;
+    }
   }
 
   while(1) {
