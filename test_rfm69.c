@@ -41,13 +41,12 @@ int main(int argc, char* argv[]) {
   if (argc > 1) {
     if (strcmp(argv[1], "-s") == 0 && strlen(argv[2]) != 1)
     {
-      rfm69_setMode(RF69_MODE_TX);
       printf("Sending: ");
       for(i = 0; i < strlen(argv[2]); i++) {
         printf("%c", argv[2][i]);
       }
       printf("\n");
-      rfm69_send(TONODEID, argv[2], strlen(argv[2]), 1);
+      rfm69_send(TONODEID, (const void*)argv[2], strlen(argv[2]), 1);
       return;
     }
   }
