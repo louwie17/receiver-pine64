@@ -40,7 +40,7 @@ char CTLBYTE;
 
 int rfm69_initialize(char freqBand, char nodeID, char networkID, int interruptPin) {
   _interruptPin = interruptPin || INTERRUPT_PIN;
-  pinMode(_interruptPin, INPUT)
+  pinMode(_interruptPin, 1);
 char i;
 const char CONFIG[][2] = {
     // Operation Mode: Sequencer ON, Listen Mode OFF, Standby mode
@@ -402,7 +402,7 @@ void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char r
 
   /* no need to wait for transmit mode to be ready since its handled by the radio */
   rfm69_setMode(RF69_MODE_TX);
-  while (digitalRead(_interruptPin) == 0); //wait for DIO0 to turn HIGH signalling transmission finish
+  //while (digitalRead(_interruptPin) == 0); //wait for DIO0 to turn HIGH signalling transmission finish
   delay(10);
   printf("Changing to TX mode\n\r");
   while (!(rfm69_readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_PACKETSENT)); // Wait for ModeReady

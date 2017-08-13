@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
   //if (argc != 2) uso();
   int i;
 
-  wiringPiSetup()
+  wiringPiSetup();
   rfm69_initialize(FREQUENCY, NODEID, NETWORKID, NULL);
 
   //rfm69_readAllRegs();
@@ -47,7 +47,8 @@ int main(int argc, char* argv[]) {
         printf("%c", argv[2][i]);
       }
       printf("\n");
-      rfm69_send(TONODEID, (const void*)argv[2], strlen(argv[2]), 1);
+      char *buffer = "test";
+      rfm69_send(TONODEID, (const void*)buffer, strlen(buffer), 0);
       return;
     }
   }
