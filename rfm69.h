@@ -53,6 +53,6 @@ void rfm69_getData(char *data);
 char rfm69_getSenderId(void);
 void rfm69_send(char toAddress, const void* buffer, char bufferSize, char requestACK);
 void rfm69_sendACK(char toAddress, const void* buffer, char bufferSize, char requestACK);
-void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char requestACK, bool sendACK);
+void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char requestACK, int sendACK);
 
 #endif

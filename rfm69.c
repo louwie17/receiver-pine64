@@ -367,7 +367,7 @@ void rfm69_send(char toAddress, const void* buffer, char bufferSize, char reques
   //printf("I will check if I can send\n\r");
   // I don't know why this function doesn't work
   //while(rfm69_canSend() != 0);
-  rfm69_sendFrame(toAddress, buffer, bufferSize, requestACK, false);// 0x00);
+  rfm69_sendFrame(toAddress, buffer, bufferSize, requestACK, 0);// 0x00);
 }
 
 void rfm69_sendACK(char toAddress, const void* buffer, char bufferSize, char requestACK) {
@@ -376,10 +376,10 @@ void rfm69_sendACK(char toAddress, const void* buffer, char bufferSize, char req
   //printf("I will check if I can send\n\r");
   // I don't know why this function doesn't work
   //while(rfm69_canSend() != 0);
-  rfm69_sendFrame(toAddress, buffer, bufferSize, requestACK, true);// 0x00);
+  rfm69_sendFrame(toAddress, buffer, bufferSize, requestACK, 1);// 0x00);
 }
 
-void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char requestACK, bool sendACK) {
+void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char requestACK, int sendACK) {
   char thedata[63];
   char i;
 
@@ -398,7 +398,7 @@ void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char r
   thedata[1] = bufferSize + 3;
   thedata[2] = toAddress;
   thedata[3] = _address;
-  if(sendACK) thedata[4] = 0x80;
+  if(sendACK == 1) thedata[4] = 0x80;
   else if(requestACK == 1) thedata[4] = 0x40;
   else thedata[4] = 0x00;
   for(i = 0; i < bufferSize; i++) {
