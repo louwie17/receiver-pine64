@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
 
       char packet[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
-      rfm69_send(senderId, (const void*) packet, 8, 0);
+      rfm69_sendACK(senderId, (const void*) packet, 8, 0);
 
       printf("New packet received! ---------------\n\r");
       printf("From: %i\n\r", senderId);
