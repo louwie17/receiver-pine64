@@ -104,6 +104,8 @@ const char CONFIG[][2] = {
   // Disable it during initialization so we always start from a known state.
   rfm69_encrypt(0);
 
+  //_promiscuousMode = 0;
+
   rfm69_setMode(RF69_MODE_STANDBY);
 
   // Is this done on function?
@@ -235,6 +237,10 @@ void rfm69_setPowerLevel(char powerLevel) {
   rfm69_writeReg(REG_PALEVEL, (rfm69_readReg(REG_PALEVEL) & 0xE0) | (_powerLevel > 31 ? 31 : _powerLevel));
 }
 
+void rfm69_setPromiscuous(char onOff) {
+  _promiscuousMode = onOff;
+}
+
 
 // If receiving but no signal detected -> I can send
 char rfm69_canSend(void) {
@@ -298,6 +304,7 @@ void rfm69_receive(void) {
 
     //printf("Payload length: %i\n\r", PAYLOADLEN);
     //printf("Target id: %i\n\r", TARGETID);
+    //printf("Promiscuous mode: %i\n", _promiscuousMode);
 
     if(!(_promiscuousMode || TARGETID==_address || TARGETID==RF69_BROADCAST_ADDR)) {//match this node's address, or $
        PAYLOADLEN = 0;

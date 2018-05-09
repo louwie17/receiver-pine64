@@ -10,7 +10,7 @@
 #include <errno.h>
 
 #define FREQUENCY RF69_915MHZ
-#define NODEID 1
+#define NODEID 4
 #define TONODEID 2
 #define NETWORKID 0
 #define TXPOWER 31
@@ -39,6 +39,7 @@ int main(int argc, char* argv[]) {
 
   rfm69_encrypt(CRYPTPASS);
   rfm69_setPowerLevel(TXPOWER); // Max Power
+  rfm69_setPromiscuous(1);
   if (argc > 1) {
     if (strcmp(argv[1], "-s") == 0 && strlen(argv[2]) != 1)
     {
@@ -61,21 +62,45 @@ int main(int argc, char* argv[]) {
       rfm69_getData(received);
       senderId = rfm69_getSenderId();
 
-      char packet[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+      char *packet = "";//{0, 1, 2, 3, 4, 5, 6, 7};
 
-      rfm69_sendACK(senderId, (const void*) packet, 8, 0);
+      rfm69_sendACK(senderId, (const void*) packet, 0, 0);
 
       printf("New packet received! ---------------\n\r");
       printf("From: %i\n\r", senderId);
       printf("Length: %i\n\r", datalen);
       printf("RSSI: %i\n\r", rssi);
       printf("Data: \n\r");
-      for(i = 0; i < datalen; i++) {
-        printf("%c", received[i]);
+      for (i=0; i < datalen; i++) {
+         printf("%c", received[i]);
       }
+      printf("\n");
+      float humidity;
+      float temperature;
+      float moisture;
+      char *s;
+      s = strtok(received, ",");
+      while (s != NULL)
+      {
+        printf("Key: %s\n", s);
+        if (s && strcmp(s, "humidity") == 0) {
+          s = strtok(0, ",");
+          humidity = atof(s);
+        }
+        if (s && strcmp(s, "temperature") == 0) {
+          s = strtok(0, ",");
+          temperature = atof(s);
+        }
+        if (s && strcmp(s, "moisture") == 0) {
+          s = strtok(0, ",");
+          moisture = atof(s);
+        }
+        s = strtok(0, ",");
+      }
+      printf("humidity: %.4f \n", humidity);
+printf("temperature: %.4f \n", temperature);
+printf("moisture: %.4f \n", moisture);
       printf("\n\r------------------------------------\n\r");
-
-      printf("A response has been sent\n\r");
     }
   }
 

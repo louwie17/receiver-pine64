@@ -44,6 +44,7 @@ void rfm69_setMode(char newMode);
 void rfm69_sleep(void);
 void rfm69_setAddress(char addr);
 void rfm69_setPowerLevel(char powerLevel);
+void rfm69_setPromiscuous(char onOff);
 char rfm69_canSend(void);
 void rfm69_receive(void);
 char rfm69_getDataLen(void);
