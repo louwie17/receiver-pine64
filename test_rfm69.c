@@ -1,5 +1,4 @@
-#include "rfm69.h"
-#include "wiringPi.h"
+#include "libs/rfm69/rfm69.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -32,7 +31,7 @@ int main(int argc, char* argv[]) {
   int i;
 
   wiringPiSetup();
-  rfm69_initialize(FREQUENCY, NODEID, NETWORKID, NULL);
+  rfm69_initialize(FREQUENCY, NODEID, NETWORKID, -1);
 
   //rfm69_readAllRegs();
   //printf("RSSI: %i", rfm69_readRSSI(0));

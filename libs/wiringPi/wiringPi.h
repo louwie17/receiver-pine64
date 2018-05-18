@@ -32,7 +32,7 @@
 #define	INT_EDGE_RISING		2
 #define	INT_EDGE_BOTH		3
 
-extern int wiringPiFailture (int fatal, const char *message, ...);
+extern int wiringPiFailure (int fatal, const char *message, ...);
 
 extern int wiringPiSetup();
 void wiringPiCleanup();

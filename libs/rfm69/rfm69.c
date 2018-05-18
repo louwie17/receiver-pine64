@@ -10,7 +10,8 @@
 
 #include "rfm69.h"
 #include "rfm69registers.h"
-#include "wiringPiSPI.h"
+#include "../wiringPi/wiringPiSPI.h"
+#include "../wiringPi/wiringPi.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -41,7 +42,7 @@ char CTLBYTE;
 int rfm69_initialize(char freqBand, char nodeID, char networkID, int interruptPin) {
   _interruptPin = interruptPin || INTERRUPT_PIN;
   pinMode(_interruptPin, 1);
-char i;
+unsigned char i;
 const char CONFIG[][2] = {
     // Operation Mode: Sequencer ON, Listen Mode OFF, Standby mode
     /* 0x01 */ { REG_OPMODE, RF_OPMODE_SEQUENCER_ON | RF_OPMODE_LISTEN_OFF | RF_OPMODE_STANDBY },
@@ -118,7 +119,7 @@ const char CONFIG[][2] = {
 
 
 void rfm69_writeReg(char addr, char value) {
-  char thedata[2];
+  unsigned char thedata[2];
   thedata[0] = addr | 0x80;
   thedata[1] = value;
 
@@ -128,7 +129,7 @@ void rfm69_writeReg(char addr, char value) {
 
 
 char rfm69_readReg(char addr) {
-  char thedata[2];
+  unsigned char thedata[2];
   thedata[0] = addr & 0x7F;
   thedata[1] = 0;
 
@@ -139,9 +140,7 @@ char rfm69_readReg(char addr) {
 }
 
 void rfm69_readAllRegs(void) {
-  char thedata[2];
   int i;
-  thedata[1] = 0;
 
   for(i = 1; i <= 0x4F; i++) {
    printf("%i - %i\n\r", i, rfm69_readReg(i));
@@ -165,8 +164,8 @@ int rfm69_readRSSI(char forceTrigger) {
 // To disable encryption: radio.encrypt(null) or radio.encrypt(0)
 // KEY HAS TO BE 16 bytes !!!
 void rfm69_encrypt(const char* key) {
-  char thedata[17];
-  char i;
+  unsigned char thedata[17];
+  unsigned char i;
 
   rfm69_setMode(RF69_MODE_STANDBY);
   if (key!=0) {
@@ -255,8 +254,8 @@ char rfm69_canSend(void) {
 
 void rfm69_receive(void) {
   unsigned long timeout = 10000;
-  char thedata[67];
-  char i;
+  unsigned char thedata[67];
+  unsigned char i;
 
   DATALEN = 0;
   SENDERID = 0;
@@ -347,7 +346,7 @@ char rfm69_getTargetId(void) {
 }
 
 void rfm69_getData(char *data) {
-  char i;
+  unsigned char i;
   for(i = 0; i < 63; i++) {
     data[i] = DATA[i];
   }
@@ -387,8 +386,8 @@ void rfm69_sendACK(char toAddress, const void* buffer, char bufferSize, char req
 }
 
 void rfm69_sendFrame(char toAddress, const void* buffer, char bufferSize, char requestACK, int sendACK) {
-  char thedata[63];
-  char i;
+  unsigned char thedata[63];
+  unsigned char i;
 
   printf("Prepared to send a new frame\n\r");
 

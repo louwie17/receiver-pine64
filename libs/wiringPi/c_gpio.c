@@ -110,7 +110,7 @@ void short_wait(void)
 int setup(void)
 {
     int mem_fd;
-    uint8_t *gpio_mem;
+    char *gpio_mem;
     uint32_t peri_base;
     uint32_t gpio_base;
     unsigned char buf[4];
@@ -126,7 +126,7 @@ pinea64_found = 1;
     if ((mem_fd = open("/dev/gpiomem", O_RDWR|O_SYNC)) > 0)
     {
         gpio_map = (uint32_t *)mmap(NULL, BLOCK_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, mem_fd, 0);
-        if ((uint32_t)gpio_map < 0) {
+        if (gpio_map == MAP_FAILED) {
             return SETUP_MMAP_FAIL;
         } else {
             return SETUP_OK;
@@ -176,8 +176,8 @@ pinea64_found = 1;
     if ((gpio_mem = malloc(BLOCK_SIZE + (PAGE_SIZE-1))) == NULL)
         return SETUP_MALLOC_FAIL;
 
-    if ((uint32_t)gpio_mem % PAGE_SIZE)
-        gpio_mem += PAGE_SIZE - ((uint32_t)gpio_mem % PAGE_SIZE);
+    if ((unsigned long)gpio_mem % PAGE_SIZE)
+        gpio_mem += PAGE_SIZE - ((unsigned long)gpio_mem % PAGE_SIZE);
 
   if ( pinea64_found )  {
     gpio_map = (uint32_t *)mmap( (caddr_t)gpio_mem, BLOCK_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_FIXED, mem_fd, SUNXI_GPIO_BASE);
@@ -186,7 +186,7 @@ pinea64_found = 1;
     gpio_map = (uint32_t *)mmap( (void *)gpio_mem, BLOCK_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_FIXED, mem_fd, gpio_base);
   }
 
-    if ((uint32_t)gpio_map < 0)
+    if (gpio_map == MAP_FAILED)
         return SETUP_MMAP_FAIL;
 
     return SETUP_OK;
@@ -216,6 +216,7 @@ int eventdetected(int gpio)
         clear_event_detect(gpio);
     return value;
   }
+  return -1;
 }
 
 void set_rising_event(int gpio, int enable)
@@ -275,22 +276,22 @@ void set_low_event(int gpio, int enable)
     clear_event_detect(gpio);
   }
 }
-
-uint32_t sunxi_readl(volatile uint32_t *addr)
-{
-    uint32_t val = 0;
-    uint32_t mmap_base = (uint32_t)addr & (~MAP_MASK);
-    uint32_t mmap_seek = ((uint32_t)addr - mmap_base) >> 2;
-    val = *(gpio_map + mmap_seek);
-    return val;
-}
-
-void sunxi_writel(volatile uint32_t *addr, uint32_t val)
-{
-    uint32_t mmap_base = (uint32_t)addr & (~MAP_MASK);
-    uint32_t mmap_seek =( (uint32_t)addr - mmap_base) >> 2;
-    *(gpio_map + mmap_seek) = val;
-}
+/*  */
+/* uint32_t sunxi_readl(volatile uint32_t *addr) */
+/* { */
+/*     uint32_t val = 0; */
+/*     uint32_t mmap_base = (uint32_t)addr & (~MAP_MASK); */
+/*     uint32_t mmap_seek = ((uint32_t)addr - mmap_base) >> 2; */
+/*     val = *(gpio_map + mmap_seek); */
+/*     return val; */
+/* } */
+/*  */
+/* void sunxi_writel(volatile uint32_t *addr, uint32_t val) */
+/* { */
+/*     uint32_t mmap_base = (uint32_t)addr & (~MAP_MASK); */
+/*     uint32_t mmap_seek =( (uint32_t)addr - mmap_base) >> 2; */
+/*     *(gpio_map + mmap_seek) = val; */
+/* } */
 
 void set_pullupdn(int gpio, int pud)
 {

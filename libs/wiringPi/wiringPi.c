@@ -248,7 +248,7 @@ void wiringPiCleanup()
       char str_gpio[4];
 
       if ((fdExport = open("/sys/class/gpio/unexport", O_WRONLY)) < 0)
-          return -1;
+          wiringPiFailure(WPI_FATAL, "wiringPiISR: export open failed: %s\n", strerror (errno));
       len = snprintf(str_gpio, sizeof(str_gpio), "%d", gpioPin);
       write(fdExport, str_gpio, len);
       close(fdExport);
@@ -373,7 +373,7 @@ int gpio_set_edge(unsigned int gpio, unsigned int mode)
       char filename[29];
 
       DEBUG_PRINT("Setting edge\n");
-      snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/edge", gpio, strerror (errno));
+      snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/edge", gpio);
 
       if ((fd = open(filename, O_WRONLY)) < 0) {
         return wiringPiFailure(WPI_FATAL, "wiringPiISR: open edge failed.\n");
@@ -386,6 +386,7 @@ int gpio_set_edge(unsigned int gpio, unsigned int mode)
     else		// Parent, wait
       wait (NULL) ;
   }
+  return -1;
 }
 
 
@@ -401,10 +402,10 @@ int wiringPiISR (int pin, int mode, void (*function)(void))
 {
   pthread_t threadId ;
   char fName   [64] ;
-  char  pinS [8] ;
-  int   count, i, result;
+  // char  pinS [8] ;
+  int   count, i; // , result;
   char  c ;
-  int bouncetime = 100;
+  /* int bouncetime = 100; */
   int gpioPin = get_gpio_number(pin);
   int bcmPin = get_bcm_number(pin);
 
