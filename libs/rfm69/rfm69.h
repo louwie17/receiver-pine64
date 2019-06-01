@@ -51,6 +51,7 @@ char rfm69_getDataLen(void);
 char rfm69_getTargetId(void);
 int rfm69_getRssi(void);
 void rfm69_getData(char *data);
+char rfm69_getDataPointer();
 char rfm69_getSenderId(void);
 void rfm69_send(char toAddress, const void* buffer, char bufferSize, char requestACK);
 void rfm69_sendACK(char toAddress, const void* buffer, char bufferSize, char requestACK);
