@@ -271,10 +271,10 @@ char rfm69_canSend(void)
 }
 
 typedef struct Payload {
-  unsigned long   uptime; //uptime in ms
-  double          humidity;
-  double          temperature;
-  int             moisture;
+  int   uptime; //uptime in ms
+  float          humidity;
+  float          temperature;
+  short          moisture;
 } Payload;
 
 void rfm69_receive(void)
@@ -365,14 +365,12 @@ void rfm69_receive(void)
 //   double          temperature;
 //   int             moisture;
 // } payload;
-      printf("Data: ...\n\r");
-      struct Payload one = {6000,76.12,19.12,234};
-      // for (i = 0; i < DATALEN; i++)
-      // {
-      //   printf("%c\n\r", thedata[i+3]);
-      //   DATA[i] = thedata[i + 3];
-      // }
-      memcpy(DATA, &one, sizeof(one));
+      // struct Payload one = {6000,76.12,19.12,234};
+      for (i = 0; i < DATALEN; i++)
+      {
+         DATA[i] = thedata[i + 3];
+      }
+      // memcpy(DATA, &one, sizeof(one));
       // printf("%d\n\r", DATA.);
 
       RSSI = rfm69_readRSSI(0);
@@ -400,14 +398,36 @@ void rfm69_getData(char *data)
   }
 }
 
+void convert_record (struct Payload *bigLittle) {
+    int x;
+
+    unsigned long temp = bigLittle->uptime;
+
+    for (x = 0; x < 8; x++) {
+        ((char *)&(bigLittle->uptime))[x] = ((char *)&temp)[8 - x];
+    }
+
+    double temph = bigLittle->humidity;
+
+    for (x = 0; x < sizeof(double); x++) {
+        ((char *)&(bigLittle->humidity))[x] = ((char *)&temph)[sizeof(double) - x - 1];
+    }
+
+    return;
+}
 
 
-char rfm69_getDataPointer(Payload cs)
+char rfm69_getDataPointer(Payload *cs)
 {
-  struct payload *pkt;
-  pkt=(struct payload *)DATA;
-  // printf("uptime %lu\n\r", pkt->uptime);
-  memcpy(&cs, &pkt, sizeof(pkt));
+  Payload *pkt;
+  pkt=(struct Payload *)DATA;
+  
+  printf("size of payload: %i\n\r", sizeof(Payload));
+  memcpy(cs, DATA, DATALEN);
+  printf("uptime %u\n\r", cs->uptime);
+  printf("humidity %f\n\r", cs->humidity);
+  printf("temp %f\n\r", cs->temperature);
+  printf("moisture %i\n\r", cs->moisture);
 }
 
 int rfm69_getRssi(void)
